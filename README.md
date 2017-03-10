@@ -23,7 +23,7 @@ while Arch provides them (alongside the binaries) with the `libdbus` package.
 
 Probably, the easiest way to install this widget is to use `luarocks`:
 
-    luarocks install upower_widget
+    luarocks install power_widget
 
 You can use the `--local` option if you don't want or can't install
 it system-wide
@@ -45,7 +45,7 @@ it system-wide.
 
 ## From source
 
-Alternatively, you can copy the `upower_widget.lua` file in your
+Alternatively, you can copy the `power_widget.lua` file in your
 `~/.config/awesome` folder. You will have to install all the dependencies
 manually though (see the `rockspec` file for more information).
 
