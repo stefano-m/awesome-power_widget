@@ -21,12 +21,13 @@ local wibox = require("wibox")
 local awful = require("awful")
 local naughty = require("naughty")
 
+local GLib = require("lgi").GLib
 local power = require("upower_dbus")
 
 -- Awesome DBus C API
 local cdbus = dbus -- luacheck: ignore
 
-local spawn_with_shell = awful.spawn.with_shell or awful.util.spawn_with_shell or awful.spawn.with_shell
+local spawn_with_shell = awful.spawn.with_shell or awful.util.spawn_with_shell
 local icon_theme_dirs = { -- The trailing slash is mandatory!
   "/usr/share/icons/Adwaita/scalable/status/",
   "/usr/share/icons/Adwaita/scalable/devices/"}
@@ -34,6 +35,7 @@ local icon_theme_extensions = {"svg"}
 icon_theme_dirs = beautiful.upower_icon_theme_dirs or icon_theme_dirs
 icon_theme_extensions = beautiful.upower_icon_theme_extension or icon_theme_extensions
 
+local ctx = GLib.MainLoop():get_context()
 local widget = wibox.widget.imagebox()
 
 local function build_icon_path(device)
@@ -49,10 +51,10 @@ function widget:update()
 
   if self.device.IsPresent then
     local percentage = math.floor(self.device.Percentage)
-    local warning_level = self.device.WarningLevel
+    local warning_level = self.device.warninglevel
 
     self.tooltip:set_text(
-      percentage .. "%" .. " - " .. self.device.State)
+      percentage .. "%" .. " - " .. self.device.state)
 
     if warning_level == "Low" or warning_level == "Critical" then
       naughty.notify({
@@ -75,7 +77,7 @@ local function setup_signals(wdg)
         ",interface=org.freedesktop.DBus.Properties" ..
         ",member=PropertiesChanged" ..
         ",path=" ..
-        wdg.device.dbus.path
+        wdg.device.object_path
     )
 
     cdbus.connect_signal("org.freedesktop.DBus.Properties",
@@ -84,14 +86,10 @@ local function setup_signals(wdg)
                          --                    ARRAY<STRING> invalidated_properties);
                          function (info, interface, changed, _)
                            if info.member == "PropertiesChanged"
-                             and interface == wdg.device.dbus.interface
-                             and info.path == wdg.device.dbus.path
+                             and interface == wdg.device.interface
+                             and info.path == wdg.device.object_path
                            then
-                             for k, v in pairs(changed) do
-                               if wdg.device[k] then
-                                 wdg.device[k] = v
-                               end
-                             end
+                             ctx:iteration()
                              wdg:update()
                            end
     end)
@@ -100,12 +98,11 @@ end
 
 function widget:init()
   local manager = power.Manager
-  manager:init()
   self.manager = manager
 
   local devices = {}
   for _, d in ipairs(self.manager.devices) do
-    devices[d.Type] = d
+    devices[d.type] = d
   end
   self.device = devices["Battery"] or devices["Line Power"]
 
