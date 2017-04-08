@@ -12,11 +12,6 @@ and UPower (for more information about this, see the
 [`upower_dbus`](https://luarocks.org/modules/stefano-m/upower_dbus)
 documentation).
 
-You will also need the DBus headers (`dbus.h`) installed.
-For example, Debian and Ubuntu provide the DBus headers with the `libdbus-1-dev`
-package, Fedora, RedHad and CentOS provide them with the `dbus-devel` package,
-while Arch provides them (alongside the binaries) with the `libdbus` package.
-
 # Installation
 
 ## Using Luarocks
