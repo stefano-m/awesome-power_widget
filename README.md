@@ -30,19 +30,6 @@ it system-wide
 
 This will ensure that all its dependencies are installed.
 
-### A note about ldbus
-
-This module depends on the [`ldbus`](https://github.com/daurnimator/ldbus)
-module that provides the low-level DBus bindings
-
-    luarocks install --server=http://luarocks.org/manifests/daurnimator \
-        ldbus \
-        DBUS_INCDIR=/usr/include/dbus-1.0/ \
-        DBUS_ARCH_INCDIR=/usr/lib/dbus-1.0/include
-
-As usual, you can use the `--local` option if you don't want or can't install
-it system-wide.
-
 ## From source
 
 Alternatively, you can copy the `power_widget.lua` file in your
