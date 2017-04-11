@@ -21,7 +21,6 @@ local wibox = require("wibox")
 local awful = require("awful")
 local naughty = require("naughty")
 
-local GLib = require("lgi").GLib
 local power = require("upower_dbus")
 
 -- Awesome DBus C API
@@ -35,7 +34,6 @@ local icon_theme_extensions = {"svg"}
 icon_theme_dirs = beautiful.upower_icon_theme_dirs or icon_theme_dirs
 icon_theme_extensions = beautiful.upower_icon_theme_extension or icon_theme_extensions
 
-local ctx = GLib.MainLoop():get_context()
 local widget = wibox.widget.imagebox()
 
 local function build_icon_path(device)
@@ -89,11 +87,30 @@ local function setup_signals(wdg)
                              and interface == wdg.device.interface
                              and info.path == wdg.device.object_path
                            then
-                             ctx:iteration()
+                             for k, v in pairs(changed) do
+                               wdg.device[k] = v
+                             end
                              wdg:update()
                            end
     end)
   end
+end
+
+-- Although it would be nice to use ctx = lgi.GLib.MainLoop:get_context() and
+-- then ctx:iteration() to update the proxy object, this causes a Lua Stack
+-- Dump in awesome. You will see a line saying "Something was left on the Lua
+-- stack, this is a bug!" in the stderr. Instead, copy over the values in a
+-- simple table and to be used when PropertiesChanged is emitted.
+local function get_data(device)
+  device = device or {}
+  local out = {}
+  for k, v in pairs(device) do
+    out[k] = v
+  end
+  for k, _ in pairs(device.accessors) do
+    out[k] = device[k]
+  end
+  return out
 end
 
 function widget:init()
@@ -104,7 +121,7 @@ function widget:init()
   for _, d in ipairs(self.manager.devices) do
     devices[d.type] = d
   end
-  self.device = devices["Battery"] or devices["Line Power"]
+  self.device = get_data(devices["Battery"] or devices["Line Power"])
 
   self.tooltip = awful.tooltip({ objects = { widget },})
   self.gui_client = ""
