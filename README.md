@@ -119,3 +119,9 @@ right_layout:add(power)
         },
     }
 ```
+
+
+# Contributing
+
+This project is developed in the author's spare time. Contributions in the form
+of issues, patches and pull requests are welcome.
