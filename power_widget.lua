@@ -22,6 +22,8 @@ local awful = require("awful")
 local naughty = require("naughty")
 
 local power = require("upower_dbus")
+local WarningLevel = power.enums.BatteryWarningLevel
+local DeviceType = power.enums.DeviceType
 
 -- Awesome DBus C API
 local cdbus = dbus -- luacheck: ignore
@@ -52,12 +54,12 @@ function widget:update()
     local warning_level = self.device.warninglevel
 
     self.tooltip:set_text(
-      percentage .. "%" .. " - " .. self.device.state)
+      percentage .. "%" .. " - " .. self.device.state.name)
 
-    if warning_level == "Low" or warning_level == "Critical" then
+    if warning_level == WarningLevel.Low or warning_level == WarningLevel.Critical then
       naughty.notify({
           preset = naughty.config.presets.critical,
-          title = warning_level .. "  battery!",
+          title = warning_level.name .. "  battery!",
           text = percentage .. "% remaining"})
     end
   else
@@ -121,7 +123,9 @@ function widget:init()
   for _, d in ipairs(self.manager.devices) do
     devices[d.type] = d
   end
-  self.device = get_data(devices["Battery"] or devices["Line Power"])
+  self.device = get_data(
+    devices[DeviceType.Battery]
+      or devices[DeviceType"Line Power"])
 
   self.tooltip = awful.tooltip({ objects = { widget },})
   self.gui_client = ""
