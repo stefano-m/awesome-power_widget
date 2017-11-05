@@ -125,7 +125,7 @@ function widget:init()
   end
   self.device = get_data(
     devices[DeviceType.Battery]
-      or devices[DeviceType"Line Power"])
+      or devices[DeviceType["Line Power"]])
 
   self.tooltip = awful.tooltip({ objects = { widget },})
   self.gui_client = ""
