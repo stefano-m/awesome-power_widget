@@ -23,7 +23,6 @@ local naughty = require("naughty")
 
 local power = require("upower_dbus")
 local WarningLevel = power.enums.BatteryWarningLevel
-local DeviceType = power.enums.DeviceType
 
 local spawn_with_shell = awful.spawn.with_shell or awful.util.spawn_with_shell
 local icon_theme_dirs = { -- The trailing slash is mandatory!
@@ -44,9 +43,11 @@ end
 
 function widget:update()
   self.device:update_mappings()
+
   self:set_image(build_icon_path(self.device))
 
   if self.device.IsPresent then
+
     local percentage = math.floor(self.device.Percentage)
     local warning_level = self.device.warninglevel
 
@@ -60,6 +61,7 @@ function widget:update()
           text = percentage .. "% remaining"})
     end
   else
+    -- We don't know how we're powered, but we must be somehow!
     self.tooltip:set_text("Plugged In")
   end
 end
@@ -68,12 +70,8 @@ function widget:init()
   local manager = power.Manager
   self.manager = manager
 
-  local devices = {}
-  for _, d in ipairs(self.manager.devices) do
-    devices[d.type] = d
-  end
-
-  self.device = devices[DeviceType.Battery] or devices[DeviceType["Line Power"]]
+  -- https://upower.freedesktop.org/docs/UPower.html#UPower.GetDisplayDevice
+  self.device = power.create_device("/org/freedesktop/UPower/devices/DisplayDevice")
 
   self.device:on_properties_changed(
     function ()
