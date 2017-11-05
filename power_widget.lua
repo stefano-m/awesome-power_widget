@@ -25,9 +25,6 @@ local power = require("upower_dbus")
 local WarningLevel = power.enums.BatteryWarningLevel
 local DeviceType = power.enums.DeviceType
 
--- Awesome DBus C API
-local cdbus = dbus -- luacheck: ignore
-
 local spawn_with_shell = awful.spawn.with_shell or awful.util.spawn_with_shell
 local icon_theme_dirs = { -- The trailing slash is mandatory!
   "/usr/share/icons/Adwaita/scalable/status/",
@@ -67,54 +64,6 @@ function widget:update()
   end
 end
 
-local function setup_signals(wdg)
-  if wdg.device then
-    -- Recent versions of UPower do not implement signals any more
-    -- Use the PropertiesChanged signal instead.
-    cdbus.add_match(
-      "system",
-      "type=signal" ..
-        ",interface=org.freedesktop.DBus.Properties" ..
-        ",member=PropertiesChanged" ..
-        ",path=" ..
-        wdg.device.object_path
-    )
-
-    cdbus.connect_signal("org.freedesktop.DBus.Properties",
-                         -- PropertiesChanged (STRING interface_name,
-                         --                    DICT<STRING,VARIANT> changed_properties,
-                         --                    ARRAY<STRING> invalidated_properties);
-                         function (info, interface, changed, _)
-                           if info.member == "PropertiesChanged"
-                             and interface == wdg.device.interface
-                             and info.path == wdg.device.object_path
-                           then
-                             for k, v in pairs(changed) do
-                               wdg.device[k] = v
-                             end
-                             wdg:update()
-                           end
-    end)
-  end
-end
-
--- Although it would be nice to use ctx = lgi.GLib.MainLoop:get_context() and
--- then ctx:iteration() to update the proxy object, this causes a Lua Stack
--- Dump in awesome. You will see a line saying "Something was left on the Lua
--- stack, this is a bug!" in the stderr. Instead, copy over the values in a
--- simple table and to be used when PropertiesChanged is emitted.
-local function get_data(device)
-  device = device or {}
-  local out = {}
-  for k, v in pairs(device) do
-    out[k] = v
-  end
-  for k, _ in pairs(device.accessors) do
-    out[k] = device[k]
-  end
-  return out
-end
-
 function widget:init()
   local manager = power.Manager
   self.manager = manager
@@ -123,14 +72,17 @@ function widget:init()
   for _, d in ipairs(self.manager.devices) do
     devices[d.type] = d
   end
-  self.device = get_data(
-    devices[DeviceType.Battery]
-      or devices[DeviceType["Line Power"]])
+
+  self.device = devices[DeviceType.Battery] or devices[DeviceType["Line Power"]]
+
+  self.device:on_properties_changed(
+    function ()
+      self:update()
+    end
+  )
 
   self.tooltip = awful.tooltip({ objects = { widget },})
   self.gui_client = ""
-
-  setup_signals(self)
 
   self:update()
 
