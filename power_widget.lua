@@ -33,6 +33,7 @@ icon_theme_dirs = beautiful.upower_icon_theme_dirs or icon_theme_dirs
 icon_theme_extensions = beautiful.upower_icon_theme_extension or icon_theme_extensions
 
 local widget = wibox.widget.imagebox()
+widget.critical_percentage = 5
 
 local function build_icon_path(device)
   if device.IconName then
@@ -54,10 +55,15 @@ function widget:update()
     self.tooltip:set_text(
       percentage .. "%" .. " - " .. self.device.state.name)
 
-    if warning_level == WarningLevel.Low or warning_level == WarningLevel.Critical then
+    if (
+        percentage <= self.critical_percentage
+        or warning_level == WarningLevel.Low
+        or warning_level == WarningLevel.Critical
+    ) then
+      local msg = (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
       naughty.notify({
           preset = naughty.config.presets.critical,
-          title = warning_level.name .. "  battery!",
+          title = msg,
           text = percentage .. "% remaining"})
     end
   else

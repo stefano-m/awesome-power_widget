@@ -68,6 +68,9 @@ This can be done by changing the `gui_client` field of the widget. The default
 is to have no client. For example, you could use the [XFCE4 Power Manager](http://goodies.xfce.org/projects/applications/xfce4-power-manager)
 or the [GNOME one](https://projects.gnome.org/gnome-power-manager/).
 
+You can set the critical battery percentage at which a warning will be
+displayed using the `critical_percentage` property (defaults to `5`).
+
 # Mouse controls
 
 When the widget is focused:
@@ -88,8 +91,10 @@ Require the module:
 -- require *after* `beautiful.init` or the theme will be inconsistent!
 local power = require("power_widget")
 -- override the GUI client.
-power:init()
 power.gui_client = "xfce4-power-manager"
+-- override the critical battery percentage
+power.critical_percentage = 18
+power:init()
 ```
 
 Add the widget to your layout:
