@@ -55,11 +55,16 @@ function widget:update()
     self.tooltip:set_text(
       percentage .. "%" .. " - " .. self.device.state.name)
 
-    if (
-        percentage <= self.critical_percentage
-        or warning_level == WarningLevel.Low
-        or warning_level == WarningLevel.Critical
-    ) then
+    local should_warn = (
+      self.device.state == power.enums.BatteryState.Discharging and
+        (
+          percentage <= self.critical_percentage
+            or warning_level == WarningLevel.Low
+            or warning_level == WarningLevel.Critical
+        )
+                        )
+
+    if should_warn then
       local msg = (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
       naughty.notify({
           preset = naughty.config.presets.critical,
