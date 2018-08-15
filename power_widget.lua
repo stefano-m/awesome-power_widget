@@ -34,6 +34,12 @@ icon_theme_extensions = beautiful.upower_icon_theme_extension or icon_theme_exte
 
 local widget = wibox.widget.imagebox()
 widget.critical_percentage = 5
+widget.warn_percentage = 20
+widget.warn_bg = '#FFCC14'
+widget.warn_fg = '#000000'
+widget.warn_timeout = 30
+
+mynotification = { notif = nil, remind = 1 }
 
 local function build_icon_path(device)
   if device.IconName then
@@ -55,25 +61,63 @@ function widget:update()
     self.tooltip:set_text(
       percentage .. "%" .. " - " .. self.device.state.name)
 
-    local should_warn = (
+    local should_critical = (
       self.device.state == power.enums.BatteryState.Discharging and
         (
           percentage <= self.critical_percentage
-            or warning_level == WarningLevel.Low
             or warning_level == WarningLevel.Critical
         )
                         )
 
-    if should_warn then
-      local msg = (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
-      naughty.notify({
-          preset = naughty.config.presets.critical,
-          title = msg,
-          text = percentage .. "% remaining"})
-    end
+    local should_warn = (
+      self.device.state == power.enums.BatteryState.Discharging and
+        (
+          percentage <= self.warn_percentage
+            or warning_level == WarningLevel.Low
+        )
+                        )
+
+    if should_warn or should_critical then
+       local msg = (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
+       local blah = percentage .. "% remaining"
+      
+       local config
+       if (should_critical) then
+          config = naughty.config.presets.critical
+       else
+	  config = { bg = widget.warn_bg,
+	  	     fg = widget.warn_fg,
+	  	     timeout = widget.warn_timeout }
+       end
+
+       if (mynotification.notif == nil) then
+	  -- Notification does not exists. Should it be created ???
+	  if (should_critical or mynotification.remind == 1) then
+	     mynotification.notif =
+		naughty.notify({
+				  preset = config,
+				  title = msg,
+				  text = blah,
+				  destroy = function(notif)
+				     mynotification = { notif = nil, remind = 0 }
+				  end
+			       })
+	     -- screen = s})
+	  end
+       else
+	  -- Notification exists, update its text
+	  naughty.replace_text(mynotification.notif, msg, blah)
+       end
+    else
+       -- Destroy existing notification
+       if (mynotification.notif ~= nil) then
+	  mynotification.notif.die(naughty.notificationClosedReason.silent)
+	  mynotification = { notif = nil, remind = 1 } 
+       end
+    end	
   else
-    -- We don't know how we're powered, but we must be somehow!
-    self.tooltip:set_text("Plugged In")
+     -- We don't know how we're powered, but we must be somehow!
+     self.tooltip:set_text("Plugged In")
   end
 end
 
