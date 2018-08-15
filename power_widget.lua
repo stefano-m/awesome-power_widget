@@ -102,7 +102,6 @@ function widget:update()
 				     mynotification = { notif = nil, remind = 0 }
 				  end
 			       })
-	     -- screen = s})
 	  end
        else
 	  -- Notification exists, update its text
