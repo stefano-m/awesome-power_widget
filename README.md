@@ -125,6 +125,34 @@ right_layout:add(power)
     }
 ```
 
+## Working Around `attempt to call field 'new' (a nil value)` error
+
+This widget has a transitive dependency on
+[lua-enum](https://github.com/stefano-m/lua-enum) that exposes a module called
+`enum.lua`. Unfortunately, the lgi library has a module with the same name and
+your AwesomeWM might have that module in the path *before* the one needed by
+this widget.  In that case, loading the widget will result in a error saying
+something like `attempt to call field 'new' (a nil value)`.
+
+In that case, you can try to rewrite `package.path` in your `rc.lua` as
+follows:
+
+``` lua
+local ok, power = pcall(require, "power_widget")
+if not ok then
+  local gears = require("gears")
+  local table = table
+
+  -- Reverse package.path so that our enum.lua is found before LGI's
+  local paths = gears.string.split(package.path, ';')
+  package.path = table.concat(gears.table.reverse(paths), ';')
+
+  package.loaded.enum = nil     -- "Unload" LGI's enum
+
+  power = require("power_widget") -- Try again
+
+end
+```
 
 # Contributing
 
