@@ -53,20 +53,16 @@ documentation of your display manager of choice for more information.
 
 # Configuration
 
-The widget displays power icons that are searched in the folders defined
-in the table `beautiful.upower_icon_theme_dirs` with extensions defined
-in the table `beautiful.upower_icon_extensions`.
-The default is to look into `"/usr/share/icons/Adwaita/scalable/devices/"`
-and  `"/usr/share/icons/Adwaita/scalable/status/"`for
-icons whose extension is `"svg"`. Note that the directory paths *must* end
-with a slash and that the extensions *must not* contain a dot.
-The icons are searched using Awesome's
-[`awful.util.geticonpath` function](https://awesomewm.org/doc/api/modules/awful.util.html#geticonpath).
+The widget will display the battery icons defined in your GTK+ theme and it
+will resize them to fit in the available space. This means that you can switch
+your icon theme, for example using `lxappearance`, and update the widget by
+restarting AwesomeWM.
 
 You can specify a GUI client to be launched when the widget is right-clicked.
 This can be done by changing the `gui_client` field of the widget. The default
-is to have no client. For example, you could use the [XFCE4 Power Manager](http://goodies.xfce.org/projects/applications/xfce4-power-manager)
-or the [GNOME one](https://projects.gnome.org/gnome-power-manager/).
+is to have no client. For example, you could use the [XFCE4 Power
+Manager](http://goodies.xfce.org/projects/applications/xfce4-power-manager) or
+the [GNOME one](https://projects.gnome.org/gnome-power-manager/).
 
 You can set the critical battery percentage at which a warning will be
 displayed using the `critical_percentage` property (defaults to `5`).
