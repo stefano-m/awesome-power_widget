@@ -14,6 +14,8 @@ documentation).
 
 # Installation
 
+## Luarocks
+
 The easiest way to install this widget is to use `luarocks`:
 
     luarocks install power_widget
@@ -50,6 +52,12 @@ If you use
 an [X Display Manager](https://en.wikipedia.org/wiki/Display_manager) you will
 need to do what explained above in your `~/.xprofile` or `~/.xinitrc`. See the
 documentation of your display manager of choice for more information.
+
+## NixOS
+
+If you are on NixOS, you can install this package from
+[nix-stefano-m-overlays](https://github.com/stefano-m/nix-stefano-m-nix-overlays).
+
 
 # Configuration
 
