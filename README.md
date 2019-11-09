@@ -95,10 +95,9 @@ Require the module:
 -- require *after* `beautiful.init` or the theme will be inconsistent!
 local power = require("power_widget")
 -- override the GUI client.
-power.gui_client = "xfce4-power-manager"
+power.gui_client = "xfce4-power-manager-settings"
 -- override the critical battery percentage
 power.critical_percentage = 18
-power:init()
 ```
 
 Add the widget to your layout:

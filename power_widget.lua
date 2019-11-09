@@ -136,6 +136,7 @@ function widget:init()
                      end
                    end
   )))
+  return self
 end
 
-return widget
+return widget:init()
