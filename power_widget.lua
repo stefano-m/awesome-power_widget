@@ -28,6 +28,15 @@ local WarningLevel = power.enums.BatteryWarningLevel
 
 local spawn_with_shell = awful.spawn.with_shell or awful.util.spawn_with_shell
 
+local math = math
+local string = string
+
+local function to_hour_min_str(seconds)
+  local hours = math.floor(seconds/3600)
+  local minutes = math.ceil( (seconds % 3600) / 60)
+  return string.format("%02dh:%02dm", hours, minutes)
+end
+
 local icon_size = 64
 local icon_flags = {IconLookupFlags.GENERIC_FALLBACK}
 
@@ -56,8 +65,28 @@ function widget:update()
     local percentage = math.floor(self.device.Percentage)
     local warning_level = self.device.warninglevel
 
+    local charge_status_msg = ""
+    local what
+    local when
+    if self.device.type == power.enums.DeviceType.Battery then
+      if self.device.TimeToEmpty > 0 then
+        what = "Emtpy"
+        when = self.device.TimeToEmpty
+      elseif self.device.TimeToFull > 0 then
+        what = "Full"
+        when = self.device.TimeToFull
+      end
+      charge_status_msg = string.format("\n%s in %s", what, to_hour_min_str(when))
+    end
+
     self.tooltip:set_text(
-      percentage .. "%" .. " - " .. self.device.state.name)
+      string.format(
+        "%d%% - %s%s",
+        percentage,
+        self.device.state.name,
+        charge_status_msg
+      )
+    )
 
     local should_warn = (
       self.device.state == power.enums.BatteryState.Discharging and
