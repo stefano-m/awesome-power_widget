@@ -124,14 +124,16 @@ function widget:init()
   )
 
   self.tooltip = awful.tooltip({ objects = { widget },})
-  self.gui_client = ""
+  self.gui_client = nil
 
   self:update()
 
   self:buttons(awful.util.table.join(
                  awful.button({ }, 3,
                    function ()
-                     spawn_with_shell(self.gui_client)
+                     if self.gui_client then
+                       spawn_with_shell(self.gui_client)
+                     end
                    end
   )))
 end
