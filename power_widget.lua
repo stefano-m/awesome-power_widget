@@ -76,7 +76,9 @@ function widget:update()
         what = "Full"
         when = self.device.TimeToFull
       end
-      charge_status_msg = string.format("\n%s in %s", what, to_hour_min_str(when))
+      if when then
+        charge_status_msg = string.format("\n%s in %s", what, to_hour_min_str(when))
+      end
     end
 
     self.tooltip:set_text(
