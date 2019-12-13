@@ -151,6 +151,13 @@ local function update(widget)
     should_warn_critical(widget),
     naughty.config.presets.critical
   )
+
+  maybe_warn(
+    widget,
+    get_percentage(widget) <= widget.warning_config.percentage,
+    widget.warning_config.preset
+  )
+
 end
 
 local function init(widget)
@@ -166,6 +173,12 @@ local function init(widget)
   widget.tooltip = awful.tooltip({ objects = { widget },})
   widget.gui_client = ni
   widget.critical_percentage = 5
+
+  widget.warning_config = {
+    percentage = -1,            -- disabled by default
+    -- https://awesomewm.org/doc/api/libraries/naughty.html#config.presets
+    preset = naughty.config.presets.normal,
+  }
 
   update(widget)
 

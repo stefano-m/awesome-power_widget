@@ -66,14 +66,45 @@ will resize them to fit in the available space. This means that you can switch
 your icon theme, for example using `lxappearance`, and update the widget by
 restarting AwesomeWM.
 
+## GUI client
+
 You can specify a GUI client to be launched when the widget is right-clicked.
 This can be done by changing the `gui_client` field of the widget. The default
 is to have no client. For example, you could use the [XFCE4 Power
 Manager](http://goodies.xfce.org/projects/applications/xfce4-power-manager) or
 the [GNOME one](https://projects.gnome.org/gnome-power-manager/).
 
+## Critical Battery Percentage
 You can set the critical battery percentage at which a warning will be
 displayed using the `critical_percentage` property (defaults to `5`).
+
+## Additional Warning Notification
+
+The `warning_config` property holds a table used to configure an additional
+warning notification at a custom percentage. This is disabled by default.
+
+It **must** contain the following properties:
+
+- `percentage`: a numeric value used to trigger the notification
+- `preset`: a [naughty preset
+  table](https://awesomewm.org/doc/api/libraries/naughty.html#config.presets)
+
+For example, one could ad a warning with a black foreground color and yellow
+background color once the battery discharges below 15% as follows:
+
+``` lua
+widget.warning_config = {
+  percentage = 15,
+  preset = {
+    bg = "#FFFF00",
+    fg = "#000000",
+  },
+}
+```
+
+You can change about anything on the notification (shape, position, opacity,
+etc.). For more details a look at the [naughty.notify
+documentation](https://awesomewm.org/doc/api/libraries/naughty.html#notify).
 
 # Mouse controls
 
