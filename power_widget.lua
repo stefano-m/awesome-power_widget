@@ -47,7 +47,7 @@ local power_widget = wibox.widget {
   widget = wibox.widget.imagebox
 }
 
-local function get_percentage(widget)
+local function get_percentage()
   local percentage = device.Percentage
 
   if percentage then
@@ -71,7 +71,7 @@ end
 
 local function maybe_warn(widget, warning_condition, notification_preset)
   local warning_level = device.warninglevel or "None"
-  local percentage = get_percentage(widget)
+  local percentage = get_percentage()
 
   if warning_condition then
     local msg = (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
@@ -92,7 +92,7 @@ end
 
 local function update_tooltip(widget)
   if device.IsPresent then
-    local percentage = get_percentage(widget)
+    local percentage = get_percentage()
     local charge_status_msg = ""
     local what
     local when
@@ -129,7 +129,7 @@ local function should_warn_critical(widget)
     return false
   end
 
-  local percentage = get_percentage(widget)
+  local percentage = get_percentage()
 
   return (
     device.state == power.enums.BatteryState.Discharging and
@@ -154,7 +154,7 @@ local function update(widget)
 
   maybe_warn(
     widget,
-    get_percentage(widget) <= widget.warning_config.percentage,
+    get_percentage() <= widget.warning_config.percentage,
     widget.warning_config.preset
   )
 
