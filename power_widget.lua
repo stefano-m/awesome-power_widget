@@ -39,6 +39,7 @@ end
 
 local icon_size = 64
 local icon_flags = {IconLookupFlags.GENERIC_FALLBACK}
+local notification = nil
 
 local widget = wibox.widget {
   resize = true,
@@ -81,8 +82,14 @@ function widget:_maybe_warn()
   if should_warn then
     local msg = (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
 
+    if notification then
+      naughty.destroy(
+        notification,
+        naughty.notificationClosedReason.dismissedByCommand
+      )
+    end
 
-    naughty.notify({
+    notification = naughty.notify({
         preset = naughty.config.presets.critical,
         title = msg,
         text = percentage .. "% remaining"})
