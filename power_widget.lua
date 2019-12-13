@@ -40,16 +40,15 @@ end
 local icon_size = 64
 local icon_flags = {IconLookupFlags.GENERIC_FALLBACK}
 local notification = nil
+local device = nil
 
-local widget = wibox.widget {
+local power_widget = wibox.widget {
   resize = true,
   widget = wibox.widget.imagebox
 }
 
-widget.critical_percentage = 5
-
-local function _get_percentage(widget)
-  local percentage = widget.device.Percentage
+local function get_percentage(widget)
+  local percentage = device.Percentage
 
   if percentage then
     return math.floor(percentage)
@@ -58,21 +57,21 @@ local function _get_percentage(widget)
   return 0
 end
 
-function widget:_update_icon()
+local function update_icon(widget)
   local icon = icon_theme:lookup_icon(
-    self.device.IconName,
+    device.IconName,
     icon_size,
     icon_flags
   )
 
   if icon then
-    self.image = icon:load_surface()
+    widget.image = icon:load_surface()
   end
 end
 
-function widget:_maybe_warn(warning_condition, notification_preset)
-  local warning_level = self.device.warninglevel or "None"
-  local percentage = _get_percentage(self)
+local function maybe_warn(widget, warning_condition, notification_preset)
+  local warning_level = device.warninglevel or "None"
+  local percentage = get_percentage(widget)
 
   if warning_condition then
     local msg = (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
@@ -91,95 +90,94 @@ function widget:_maybe_warn(warning_condition, notification_preset)
   end
 end
 
-function widget:_update_tooltip()
-  if self.device.IsPresent then
-    local percentage = _get_percentage(self)
+local function update_tooltip(widget)
+  if device.IsPresent then
+    local percentage = get_percentage(widget)
     local charge_status_msg = ""
     local what
     local when
-    if self.device.type == power.enums.DeviceType.Battery then
-      if self.device.TimeToEmpty > 0 then
+    if device.type == power.enums.DeviceType.Battery then
+      if device.TimeToEmpty > 0 then
         what = "Emtpy"
-        when = self.device.TimeToEmpty
-      elseif self.device.TimeToFull > 0 then
+        when = device.TimeToEmpty
+      elseif device.TimeToFull > 0 then
         what = "Full"
-        when = self.device.TimeToFull
+        when = device.TimeToFull
       end
       if when then
         charge_status_msg = string.format("\n%s in %s", what, to_hour_min_str(when))
       end
     end
 
-    self.tooltip:set_text(
+    widget.tooltip:set_text(
       string.format(
         "%d%% - %s%s",
         percentage,
-        self.device.state.name,
+        device.state.name,
         charge_status_msg
       )
     )
   else
     -- We don't know how we're powered, but we must be somehow!
-    self.tooltip:set_text("Plugged In")
+    widget.tooltip:set_text("Plugged In")
   end
 
 end
 
-local function _should_warn_critical(widget)
-  if not widget.device.IsPresent then
+local function should_warn_critical(widget)
+  if not device.IsPresent then
     return false
   end
 
-  local percentage = _get_percentage(widget)
+  local percentage = get_percentage(widget)
 
   return (
-    widget.device.state == power.enums.BatteryState.Discharging and
+    device.state == power.enums.BatteryState.Discharging and
       (
         percentage <= widget.critical_percentage
-          or widget.device.warninglevel == WarningLevel.Low
-          or widget.device.warninglevel == WarningLevel.Critical
+          or device.warninglevel == WarningLevel.Low
+          or device.warninglevel == WarningLevel.Critical
       )
   )
 end
 
-function widget:update()
-  self.device:update_mappings()
-  self:_update_icon()
-  self:_update_tooltip()
+local function update(widget)
+  device:update_mappings()
+  update_icon(widget)
+  update_tooltip(widget)
 
-  self:_maybe_warn(
-    _should_warn_critical(self),
+  maybe_warn(
+    widget,
+    should_warn_critical(widget),
     naughty.config.presets.critical
   )
 end
 
-function widget:init()
-  local manager = power.Manager
-  self.manager = manager
-
+local function init(widget)
   -- https://upower.freedesktop.org/docs/UPower.html#UPower.GetDisplayDevice
-  self.device = power.create_device("/org/freedesktop/UPower/devices/DisplayDevice")
+  device = power.create_device("/org/freedesktop/UPower/devices/DisplayDevice")
 
-  self.device:on_properties_changed(
+  device:on_properties_changed(
     function ()
-      self:update()
+      update(widget)
     end
   )
 
-  self.tooltip = awful.tooltip({ objects = { widget },})
-  self.gui_client = nil
+  widget.tooltip = awful.tooltip({ objects = { widget },})
+  widget.gui_client = ni
+  widget.critical_percentage = 5
 
-  self:update()
+  update(widget)
 
-  self:buttons(awful.util.table.join(
+  widget:buttons(awful.util.table.join(
                  awful.button({ }, 3,
                    function ()
-                     if self.gui_client then
-                       spawn_with_shell(self.gui_client)
+                     if widget.gui_client then
+                       spawn_with_shell(widget.gui_client)
                      end
                    end
   )))
-  return self
+  return widget
 end
 
-return widget:init()
+return init(power_widget)
