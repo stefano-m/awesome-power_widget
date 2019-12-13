@@ -47,9 +47,7 @@ local widget = wibox.widget {
 
 widget.critical_percentage = 5
 
-function widget:update()
-  self.device:update_mappings()
-
+function widget:_update_icon()
   local icon = icon_theme:lookup_icon(
     self.device.IconName,
     icon_size,
@@ -59,12 +57,41 @@ function widget:update()
   if icon then
     self.image = icon:load_surface()
   end
+end
+
+function widget:_maybe_warn()
+  local warning_level = self.device.warninglevel or "None"
+  local percentage = math.floor(self.device.Percentage) or 0
+
+  local should_warn = false
 
   if self.device.IsPresent then
 
-    local percentage = math.floor(self.device.Percentage)
-    local warning_level = self.device.warninglevel
+    should_warn = (
+      self.device.state == power.enums.BatteryState.Discharging and
+        (
+          percentage <= self.critical_percentage
+            or warning_level == WarningLevel.Low
+            or warning_level == WarningLevel.Critical
+        )
+                  )
 
+  end
+
+  if should_warn then
+    local msg = (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
+
+
+    naughty.notify({
+        preset = naughty.config.presets.critical,
+        title = msg,
+        text = percentage .. "% remaining"})
+  end
+end
+
+function widget:_update_tooltip()
+  if self.device.IsPresent then
+    local percentage = math.floor(self.device.Percentage)
     local charge_status_msg = ""
     local what
     local when
@@ -89,27 +116,19 @@ function widget:update()
         charge_status_msg
       )
     )
-
-    local should_warn = (
-      self.device.state == power.enums.BatteryState.Discharging and
-        (
-          percentage <= self.critical_percentage
-            or warning_level == WarningLevel.Low
-            or warning_level == WarningLevel.Critical
-        )
-                        )
-
-    if should_warn then
-      local msg = (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
-      naughty.notify({
-          preset = naughty.config.presets.critical,
-          title = msg,
-          text = percentage .. "% remaining"})
-    end
   else
     -- We don't know how we're powered, but we must be somehow!
     self.tooltip:set_text("Plugged In")
   end
+
+end
+
+
+function widget:update()
+  self.device:update_mappings()
+  self:_update_icon()
+  self:_update_tooltip()
+  self:_maybe_warn()
 end
 
 function widget:init()
