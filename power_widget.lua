@@ -48,6 +48,16 @@ local widget = wibox.widget {
 
 widget.critical_percentage = 5
 
+local function _get_percentage(widget)
+  local percentage = widget.device.Percentage
+
+  if percentage then
+    return math.floor(percentage)
+  end
+
+  return 0
+end
+
 function widget:_update_icon()
   local icon = icon_theme:lookup_icon(
     self.device.IconName,
@@ -60,26 +70,11 @@ function widget:_update_icon()
   end
 end
 
-function widget:_maybe_warn()
+function widget:_maybe_warn(warning_condition, notification_preset)
   local warning_level = self.device.warninglevel or "None"
-  local percentage = math.floor(self.device.Percentage) or 0
+  local percentage = _get_percentage(self)
 
-  local should_warn = false
-
-  if self.device.IsPresent then
-
-    should_warn = (
-      self.device.state == power.enums.BatteryState.Discharging and
-        (
-          percentage <= self.critical_percentage
-            or warning_level == WarningLevel.Low
-            or warning_level == WarningLevel.Critical
-        )
-                  )
-
-  end
-
-  if should_warn then
+  if warning_condition then
     local msg = (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
 
     if notification then
@@ -90,7 +85,7 @@ function widget:_maybe_warn()
     end
 
     notification = naughty.notify({
-        preset = naughty.config.presets.critical,
+        preset = notification_preset,
         title = msg,
         text = percentage .. "% remaining"})
   end
@@ -98,7 +93,7 @@ end
 
 function widget:_update_tooltip()
   if self.device.IsPresent then
-    local percentage = math.floor(self.device.Percentage)
+    local percentage = _get_percentage(self)
     local charge_status_msg = ""
     local what
     local when
@@ -130,12 +125,32 @@ function widget:_update_tooltip()
 
 end
 
+local function _should_warn_critical(widget)
+  if not widget.device.IsPresent then
+    return false
+  end
+
+  local percentage = _get_percentage(widget)
+
+  return (
+    widget.device.state == power.enums.BatteryState.Discharging and
+      (
+        percentage <= widget.critical_percentage
+          or widget.device.warninglevel == WarningLevel.Low
+          or widget.device.warninglevel == WarningLevel.Critical
+      )
+  )
+end
 
 function widget:update()
   self.device:update_mappings()
   self:_update_icon()
   self:_update_tooltip()
-  self:_maybe_warn()
+
+  self:_maybe_warn(
+    _should_warn_critical(self),
+    naughty.config.presets.critical
+  )
 end
 
 function widget:init()
