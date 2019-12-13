@@ -171,7 +171,7 @@ local function init(widget)
   )
 
   widget.tooltip = awful.tooltip({ objects = { widget },})
-  widget.gui_client = ni
+  widget.gui_client = nil
   widget.critical_percentage = 5
 
   widget.warning_config = {
