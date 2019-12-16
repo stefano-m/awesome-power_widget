@@ -158,6 +158,13 @@ local function update(widget)
     widget.warning_config.preset
   )
 
+  if device.state ~= power.enums.BatteryState.Discharging and notification then
+    naughty.destroy(
+      notification,
+      naughty.notificationClosedReason.dismissedByCommand
+    )
+  end
+
 end
 
 local function init(widget)
