@@ -183,12 +183,12 @@ local function init(widget)
   update(widget)
 
   widget:buttons(awful.util.table.join(
-                 awful.button({ }, 3,
-                   function ()
-                     if widget.gui_client then
-                       spawn_with_shell(widget.gui_client)
+                   awful.button({ }, 3,
+                     function ()
+                       if widget.gui_client then
+                         spawn_with_shell(widget.gui_client)
+                       end
                      end
-                   end
   )))
   return widget
 end
