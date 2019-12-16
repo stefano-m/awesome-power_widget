@@ -69,12 +69,12 @@ local function update_icon(widget)
   end
 end
 
-local function maybe_warn(widget, warning_condition, notification_preset)
+local function maybe_warn(widget, warning_condition, notification_preset, message)
   local warning_level = device.warninglevel or "None"
   local percentage = get_percentage()
 
   if warning_condition then
-    local msg = (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
+    local msg = message or (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
 
     if notification then
       naughty.destroy(
@@ -158,7 +158,8 @@ local function update(widget)
     maybe_warn(
       widget,
       get_percentage() <= widget.warning_config.percentage,
-      widget.warning_config.preset
+      widget.warning_config.preset,
+      widget.warning_config.message
     )
   end
 

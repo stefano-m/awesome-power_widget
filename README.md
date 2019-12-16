@@ -89,8 +89,12 @@ It **must** contain the following properties:
 - `preset`: a [naughty preset
   table](https://awesomewm.org/doc/api/libraries/naughty.html#config.presets)
 
-For example, one could ad a warning with a black foreground color and yellow
-background color once the battery discharges below 15% as follows:
+Optionally, it can also have the `message` property that should be a string
+with a custom warning message.
+
+For example, one could add a warning with a custom message, a black foreground
+color and yellow background color once the battery discharges below 15% as
+follows:
 
 ``` lua
 widget.warning_config = {
@@ -99,6 +103,7 @@ widget.warning_config = {
     bg = "#FFFF00",
     fg = "#000000",
   },
+  message = "The battery is getting low",
 }
 ```
 
