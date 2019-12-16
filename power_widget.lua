@@ -146,17 +146,21 @@ local function update(widget)
   update_icon(widget)
   update_tooltip(widget)
 
-  maybe_warn(
-    widget,
-    should_warn_critical(widget),
-    naughty.config.presets.critical
-  )
+  local critical_warn = should_warn_critical(widget)
 
   maybe_warn(
     widget,
-    get_percentage() <= widget.warning_config.percentage,
-    widget.warning_config.preset
+    critical_warn,
+    naughty.config.presets.critical
   )
+
+  if not critical_warn then
+    maybe_warn(
+      widget,
+      get_percentage() <= widget.warning_config.percentage,
+      widget.warning_config.preset
+    )
+  end
 
   if device.state ~= power.enums.BatteryState.Discharging and notification then
     naughty.destroy(
