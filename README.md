@@ -97,7 +97,11 @@ For example, one could add a warning with a custom message that times out after
 yellow background color once the battery discharges below 15% as follows:
 
 ``` lua
-widget.warning_config = {
+local gears = require("gears") -- needed to set the shape
+
+local power = require("power_widget")
+
+power.warning_config = {
   percentage = 15,
   message = "The battery is getting low",
   preset = {
