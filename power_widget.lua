@@ -71,7 +71,6 @@ end
 
 local function maybe_warn(widget, warning_condition, notification_preset, message)
   local warning_level = device.warninglevel or "None"
-  local percentage = get_percentage()
 
   if warning_condition then
     local msg = message or (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
@@ -86,7 +85,7 @@ local function maybe_warn(widget, warning_condition, notification_preset, messag
     notification = naughty.notify({
         preset = notification_preset,
         title = msg,
-        text = percentage .. "% remaining"})
+        text = get_percentage() .. "% remaining"})
   end
 end
 
