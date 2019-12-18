@@ -92,18 +92,20 @@ It **must** contain the following properties:
 Optionally, it can also have the `message` property that should be a string
 with a custom warning message.
 
-For example, one could add a warning with a custom message, a black foreground
-color and yellow background color once the battery discharges below 15% as
-follows:
+For example, one could add a warning with a custom message that times out after
+12 seconds, the shape of a rounded rectangle, a black foreground color and
+yellow background color once the battery discharges below 15% as follows:
 
 ``` lua
 widget.warning_config = {
   percentage = 15,
+  message = "The battery is getting low",
   preset = {
+    shape = gears.shape.rounded_rect,
+    timeout = 12,
     bg = "#FFFF00",
     fg = "#000000",
   },
-  message = "The battery is getting low",
 }
 ```
 
