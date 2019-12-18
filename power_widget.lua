@@ -70,9 +70,9 @@ local function update_icon(widget)
 end
 
 local function maybe_warn(widget, warning_condition, notification_preset, message)
-  local warning_level = device.warninglevel or "None"
 
   if warning_condition then
+    local warning_level = device.warninglevel or power.enums.BatteryWarningLevel.None
     local msg = message or (warning_level.name == "None" and "Low" or warning_level.name) .. " battery!"
 
     if notification then
