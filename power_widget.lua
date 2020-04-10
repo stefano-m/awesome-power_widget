@@ -97,7 +97,7 @@ local function update_tooltip(widget)
     local when
     if device.type == power.enums.DeviceType.Battery then
       if device.TimeToEmpty > 0 then
-        what = "Emtpy"
+        what = "Empty"
         when = device.TimeToEmpty
       elseif device.TimeToFull > 0 then
         what = "Full"
