@@ -15,13 +15,18 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ]]
 
+local os = os
+
 local wibox = require("wibox")
 local awful = require("awful")
 local naughty = require("naughty")
 
 local lgi = require('lgi')
-local icon_theme = lgi.Gtk.IconTheme.get_default()
-local IconLookupFlags = lgi.Gtk.IconLookupFlags
+
+Gtk = os.getenv("POWER_WIDGET_GTK_VERSION") and lgi.require("Gtk", os.getenv("POWER_WIDGET_GTK_VERSION")) or lgi.Gtk
+
+local icon_theme = Gtk.IconTheme.get_default()
+local IconLookupFlags = Gtk.IconLookupFlags
 
 local power = require("upower_dbus")
 local WarningLevel = power.enums.BatteryWarningLevel

@@ -66,6 +66,18 @@ will resize them to fit in the available space. This means that you can switch
 your icon theme, for example using `lxappearance`, and update the widget by
 restarting AwesomeWM.
 
+## Choosing GTK Version
+
+You can use the `POWER_WIDGET_GTK_VERSION` environment variable to use a
+specific version of GTK rather than letting lgi pick the default one.
+
+For example:
+
+``` shell
+export POWER_WIDGET_GTK_VERSION=3.0
+exec awesome
+```
+
 ## GUI client
 
 You can specify a GUI client to be launched when the widget is right-clicked.
